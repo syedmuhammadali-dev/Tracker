@@ -9,14 +9,14 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 import { LocationService } from '../../services/LocationService';
+import { MainStackParamList } from '../../types/navigation';
 import { Switch, Alert } from 'react-native';
 
 const HomeScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
   const { user, isSharing, setSharing } = useAuthStore();
 
   const toggleSharing = async () => {

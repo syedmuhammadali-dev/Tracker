@@ -14,7 +14,7 @@ import auth from '@react-native-firebase/auth';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
-import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { AuthStackParamList } from '../../types/navigation';
 
 const OtpVerificationScreen = () => {
   const route = useRoute<RouteProp<AuthStackParamList, 'OtpVerification'>>();

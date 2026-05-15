@@ -4,13 +4,7 @@ import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import OtpVerificationScreen from '../screens/auth/OtpVerificationScreen';
 import ProfileSetupScreen from '../screens/auth/ProfileSetupScreen';
-
-export type AuthStackParamList = {
-  Onboarding: undefined;
-  Login: undefined;
-  OtpVerification: { phoneNumber: string; confirmation: any };
-  ProfileSetup: undefined;
-};
+import { AuthStackParamList } from '../types/navigation';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 

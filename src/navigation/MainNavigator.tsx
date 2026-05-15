@@ -1,3 +1,5 @@
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/main/HomeScreen';
 import MapScreen from '../screens/main/MapScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
@@ -7,19 +9,7 @@ import GroupMembersScreen from '../screens/main/GroupMembersScreen';
 import AddSafeZoneScreen from '../screens/main/AddSafeZoneScreen';
 import SafeZonesListScreen from '../screens/main/SafeZonesListScreen';
 import SOSScreen from '../screens/main/SOSScreen';
-import { createStackNavigator } from '@react-navigation/stack';
-
-export type MainStackParamList = {
-  Home: undefined;
-  Map: undefined;
-  Settings: undefined;
-  CreateGroup: undefined;
-  JoinGroup: undefined;
-  GroupMembers: { groupId: string };
-  AddSafeZone: undefined;
-  SafeZonesList: undefined;
-  SOS: undefined;
-};
+import { MainStackParamList } from '../types/navigation';
 
 const Stack = createStackNavigator<MainStackParamList>();
 
