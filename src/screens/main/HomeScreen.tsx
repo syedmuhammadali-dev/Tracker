@@ -12,10 +12,26 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
+import { LocationService } from '../../services/LocationService';
+import { Switch, Alert } from 'react-native';
 
 const HomeScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { user } = useAuthStore();
+  const { user, isSharing, setSharing } = useAuthStore();
+
+  const toggleSharing = async () => {
+    if (!isSharing) {
+      const success = await LocationService.startSharing();
+      if (success) {
+        setSharing(true);
+      }
+    } else {
+      const success = await LocationService.stopSharing();
+      if (success) {
+        setSharing(false);
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,6 +47,20 @@ const HomeScreen = () => {
           >
             <Text>⚙️</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.sharingCard}>
+          <View style={styles.sharingInfo}>
+            <Text style={styles.sharingTitle}>Location Sharing</Text>
+            <Text style={styles.sharingSubtitle}>
+              {isSharing ? 'Live location is being shared' : 'Location sharing is paused'}
+            </Text>
+          </View>
+          <Switch
+            value={isSharing}
+            onValueChange={toggleSharing}
+            trackColor={{ false: COLORS.border, true: COLORS.primary }}
+          />
         </View>
 
         <TouchableOpacity
@@ -97,6 +127,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+  sharingCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    padding: SPACING.md,
+    borderRadius: SIZES.radius,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  sharingInfo: {
+    flex: 1,
+  },
+  sharingTitle: {
+    ...FONTS.h3,
+    color: COLORS.text,
+  },
+  sharingSubtitle: {
+    ...FONTS.body3,
+    color: COLORS.textSecondary,
   },
   mapCard: {
     backgroundColor: COLORS.surface,

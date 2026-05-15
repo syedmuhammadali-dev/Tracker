@@ -1,0 +1,145 @@
+import Geolocation from 'react-native-geolocation-service';
+import BackgroundService from 'react-native-background-actions';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import DeviceInfo from 'react-native-device-info';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
+
+const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+
+const backgroundOptions = {
+  taskName: 'SafeCirclePKLocation',
+  taskTitle: 'SafeCircle PK',
+  taskDesc: 'Sharing live location with your family',
+  taskIcon: {
+    name: 'ic_launcher',
+    type: 'mipmap',
+  },
+  color: '#00A86B',
+  parameters: {
+    delay: 30000, // 30 seconds
+  },
+};
+
+export const LocationService = {
+  async requestPermissions() {
+    if (Platform.OS === 'ios') {
+      const auth = await Geolocation.requestAuthorization('always');
+      return auth === 'granted';
+    }
+
+    if (Platform.OS === 'android') {
+      const foreground = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (foreground !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission Denied', 'Foreground location permission is required.');
+        return false;
+      }
+
+      // For Android 10+
+      if (Platform.Version >= 29) {
+        const background = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
+        );
+        if (background !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert(
+            'Permission Denied',
+            'Background location permission is required for continuous family safety.'
+          );
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  },
+
+  async locationTask(taskDataArguments: any) {
+    const { delay } = taskDataArguments;
+    await new Promise(async (resolve) => {
+      while (BackgroundService.isRunning()) {
+        Geolocation.getCurrentPosition(
+          async (position) => {
+            await LocationService.updateFirestoreLocation(position);
+          },
+          (error) => {
+            console.error('Location Error:', error);
+          },
+          { 
+            enableHighAccuracy: true, 
+            timeout: 15000, 
+            maximumAge: 10000,
+            forceRequestLocation: true 
+          }
+        );
+        await sleep(delay);
+      }
+    });
+  },
+
+  async startSharing() {
+    const hasPermissions = await this.requestPermissions();
+    if (!hasPermissions) return false;
+
+    try {
+      if (!BackgroundService.isRunning()) {
+        await BackgroundService.start(this.locationTask, backgroundOptions);
+      }
+      return true;
+    } catch (error) {
+      console.error('Start Sharing Error:', error);
+      return false;
+    }
+  },
+
+  async stopSharing() {
+    try {
+      if (BackgroundService.isRunning()) {
+        await BackgroundService.stop();
+      }
+      return true;
+    } catch (error) {
+      console.error('Stop Sharing Error:', error);
+      return false;
+    }
+  },
+
+  async updateFirestoreLocation(position: Geolocation.GeoPosition) {
+    const currentUser = auth().currentUser;
+    if (!currentUser) return;
+
+    try {
+      const batteryLevel = await DeviceInfo.getBatteryLevel();
+      const { latitude, longitude, accuracy } = position.coords;
+
+      const locationData = {
+        location: {
+          latitude,
+          longitude,
+          accuracy,
+        },
+        batteryLevel: Math.round(batteryLevel * 100),
+        lastUpdated: firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Update in user's profile
+      await firestore().collection('users').doc(currentUser.uid).set(locationData, { merge: true });
+
+      // If user is in a group, update in group members as well
+      const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+      const groupId = userDoc.data()?.groupId;
+
+      if (groupId) {
+        await firestore()
+          .collection('familyGroups')
+          .doc(groupId)
+          .collection('members')
+          .doc(currentUser.uid)
+          .set(locationData, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error updating location to Firestore:', error);
+    }
+  }
+};
