@@ -6,6 +6,7 @@ import JoinGroupScreen from '../screens/main/JoinGroupScreen';
 import GroupMembersScreen from '../screens/main/GroupMembersScreen';
 import AddSafeZoneScreen from '../screens/main/AddSafeZoneScreen';
 import SafeZonesListScreen from '../screens/main/SafeZonesListScreen';
+import SOSScreen from '../screens/main/SOSScreen';
 
 export type MainStackParamList = {
   Home: undefined;
@@ -16,6 +17,7 @@ export type MainStackParamList = {
   GroupMembers: { groupId: string };
   AddSafeZone: undefined;
   SafeZonesList: undefined;
+  SOS: undefined;
 };
 
 const Stack = createStackNavigator<MainStackParamList>();
@@ -31,6 +33,7 @@ const MainNavigator = () => {
       <Stack.Screen name="GroupMembers" component={GroupMembersScreen} />
       <Stack.Screen name="AddSafeZone" component={AddSafeZoneScreen} />
       <Stack.Screen name="SafeZonesList" component={SafeZonesListScreen} />
+      <Stack.Screen name="SOS" component={SOSScreen} />
     </Stack.Navigator>
   );
 };

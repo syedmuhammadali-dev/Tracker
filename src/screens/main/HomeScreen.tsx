@@ -81,13 +81,17 @@ const HomeScreen = () => {
           <View style={styles.actionGrid}>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: COLORS.error }]}
+              onPress={() => navigation.navigate('SOS')}
             >
               <Text style={styles.actionIcon}>🚨</Text>
-              <Text style={styles.actionText}>SOS</Text>
+              <Text style={[styles.actionText, { color: COLORS.white }]}>SOS</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('SafeZonesList')}
+            >
               <Text style={styles.actionIcon}>🏠</Text>
-              <Text style={styles.actionText}>Places</Text>
+              <Text style={styles.actionText}>Safe Zones</Text>
             </TouchableOpacity>
           </View>
         </View>
