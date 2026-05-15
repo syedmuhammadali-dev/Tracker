@@ -7,6 +7,21 @@ import { Alert, PermissionsAndroid, Platform } from 'react-native';
 
 const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371e3; // Earth's radius in meters
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Distance in meters
+};
+
 const backgroundOptions = {
   taskName: 'SafeCirclePKLocation',
   taskTitle: 'SafeCircle PK',
@@ -137,9 +152,68 @@ export const LocationService = {
           .collection('members')
           .doc(currentUser.uid)
           .set(locationData, { merge: true });
+
+        // Check Safe Zones
+        await this.checkSafeZones(groupId, currentUser.uid, latitude, longitude);
       }
     } catch (error) {
       console.error('Error updating location to Firestore:', error);
+    }
+  },
+
+  async checkSafeZones(groupId: string, userId: string, lat: number, lng: number) {
+    try {
+      const zonesSnapshot = await firestore()
+        .collection('familyGroups')
+        .doc(groupId)
+        .collection('safeZones')
+        .get();
+
+      const userDoc = await firestore().collection('users').doc(userId).get();
+      const userData = userDoc.data();
+      const previousZones = userData?.currentZones || [];
+      const newZones: string[] = [];
+
+      for (const zoneDoc of zonesSnapshot.docs) {
+        const zone = zoneDoc.data();
+        const distance = calculateDistance(lat, lng, zone.latitude, zone.longitude);
+
+        if (distance <= zone.radius) {
+          newZones.push(zone.name);
+          if (!previousZones.includes(zone.name)) {
+            // Entered Zone
+            this.sendZoneAlert(groupId, userData?.displayName, zone.name, 'entered');
+          }
+        } else if (previousZones.includes(zone.name)) {
+          // Exited Zone
+          this.sendZoneAlert(groupId, userData?.displayName, zone.name, 'exited');
+        }
+      }
+
+      await firestore().collection('users').doc(userId).update({
+        currentZones: newZones,
+      });
+    } catch (error) {
+      console.error('Error checking safe zones:', error);
+    }
+  },
+
+  async sendZoneAlert(groupId: string, userName: string, zoneName: string, action: 'entered' | 'exited') {
+    // In a real app, this would trigger a push notification via Firebase Functions.
+    // For now, we'll log it and create a notification in Firestore.
+    try {
+      await firestore()
+        .collection('familyGroups')
+        .doc(groupId)
+        .collection('alerts')
+        .add({
+          title: 'Safe Zone Alert',
+          message: `${userName} has ${action} the ${zoneName} safe zone.`,
+          type: 'geofence',
+          createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (error) {
+      console.error('Error sending zone alert:', error);
     }
   }
 };
