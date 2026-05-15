@@ -25,6 +25,7 @@ export type MainStackParamList = {
   AddSafeZone: undefined;
   SafeZonesList: undefined;
   SOS: undefined;
+  PrivacySettings: { groupId: string };
 };
 
 export type AppNavigationProp = StackNavigationProp<

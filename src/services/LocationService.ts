@@ -147,26 +147,64 @@ export const LocationService = {
         lastUpdated: firestore.FieldValue.serverTimestamp(),
       };
 
-      // Update in user's profile
+      // Always update user's own profile
       await firestore()
         .collection('users')
         .doc(currentUser.uid)
         .set(locationData, { merge: true });
 
-      // If user is in a group, update in group members as well
+      // Fetch user data to check groupId
       const userDoc = await firestore()
         .collection('users')
         .doc(currentUser.uid)
         .get();
-      const groupId = userDoc.data()?.groupId;
+      const userData = userDoc.data();
+      const groupId = userData?.groupId;
 
       if (groupId) {
+        const memberDoc = await firestore()
+          .collection('familyGroups')
+          .doc(groupId)
+          .collection('members')
+          .doc(currentUser.uid)
+          .get();
+
+        const memberData = memberDoc.data();
+
+        // 1. Check Pause Sharing
+        if (memberData?.pauseSharing) {
+          console.log('Location sharing is paused by user');
+          return;
+        }
+
+        // 2. Check Scheduled Sharing
+        if (memberData?.shareDuringHours) {
+          const now = new Date();
+          const currentTime = `${now
+            .getHours()
+            .toString()
+            .padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          const start = memberData.startHour || '00:00';
+          const end = memberData.endHour || '23:59';
+
+          if (currentTime < start || currentTime > end) {
+            console.log('Outside sharing hours');
+            return;
+          }
+        }
+
+        // 3. Update in group members
+        const groupLocationData = {
+          ...locationData,
+          isInvisible: memberData?.invisibleMode || false,
+        };
+
         await firestore()
           .collection('familyGroups')
           .doc(groupId)
           .collection('members')
           .doc(currentUser.uid)
-          .set(locationData, { merge: true });
+          .set(groupLocationData, { merge: true });
 
         // Check Safe Zones
         await this.checkSafeZones(

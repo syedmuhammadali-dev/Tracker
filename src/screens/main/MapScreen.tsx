@@ -102,9 +102,11 @@ const FamilyMapScreen = () => {
         showsMyLocationButton={false}
         onRegionChangeComplete={setRegion}
       >
-        {members.map(member => (
-          <MemberMarker key={member.uid} member={member} />
-        ))}
+        {members
+          .filter(member => !member.isInvisible || member.uid === user?.uid)
+          .map(member => (
+            <MemberMarker key={member.uid} member={member} />
+          ))}
       </MapView>
 
       {/* Header / Back Button */}

@@ -7,11 +7,15 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const SettingsScreen = () => {
+  const navigation = useNavigation<any>();
   const { user, logout } = useAuthStore();
   const [isSharing, setIsSharing] = React.useState(true);
 
@@ -21,11 +25,37 @@ const SettingsScreen = () => {
         <Text style={styles.title}>Settings</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacy</Text>
-          <View style={styles.row}>
-            <View>
-              <Text style={styles.rowTitle}>Share Location</Text>
-              <Text style={styles.rowSubtitle}>
+          <Text style={styles.sectionTitle}>Privacy & Safety</Text>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() =>
+              navigation.navigate('PrivacySettings', { groupId: user?.groupId })
+            }
+          >
+            <View style={styles.menuIconContainer}>
+              <Icon
+                name="shield-lock-outline"
+                size={24}
+                color={COLORS.primary}
+              />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuTitle}>Privacy Settings</Text>
+              <Text style={styles.menuSubtitle}>
+                Location sharing, invisible mode & group privacy
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={24} color={COLORS.border} />
+          </TouchableOpacity>
+
+          <View style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+            <View style={styles.menuIconContainer}>
+              <Icon name="map-marker-radius" size={24} color={COLORS.primary} />
+            </View>
+            <View style={styles.menuTextContainer}>
+              <Text style={styles.menuTitle}>Share Location</Text>
+              <Text style={styles.menuSubtitle}>
                 Allow family to see your live location
               </Text>
             </View>
@@ -33,6 +63,7 @@ const SettingsScreen = () => {
               value={isSharing}
               onValueChange={setIsSharing}
               trackColor={{ false: COLORS.border, true: COLORS.primary }}
+              thumbColor={COLORS.white}
             />
           </View>
         </View>
@@ -81,16 +112,31 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     marginBottom: SPACING.md,
   },
-  row: {
+  menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  rowTitle: {
+  menuIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  menuTextContainer: {
+    flex: 1,
+  },
+  menuTitle: {
     ...FONTS.body1,
     fontWeight: '600',
+    color: COLORS.text,
   },
-  rowSubtitle: {
+  menuSubtitle: {
     ...FONTS.body3,
     color: COLORS.textSecondary,
   },

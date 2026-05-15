@@ -9,6 +9,7 @@ import AddSafeZoneScreen from '../screens/main/AddSafeZoneScreen';
 import SafeZonesListScreen from '../screens/main/SafeZonesListScreen';
 import SOSScreen from '../screens/main/SOSScreen';
 import JoinGroupScreen from '../screens/main/JoinGroupScreen';
+import PrivacySettingsScreen from '../screens/main/PrivacySettingsScreen';
 import { MainStackParamList } from '../types/navigation';
 
 const Stack = createStackNavigator<MainStackParamList>();
@@ -25,6 +26,7 @@ const MainNavigator = () => {
       <Stack.Screen name="AddSafeZone" component={AddSafeZoneScreen} />
       <Stack.Screen name="SafeZonesList" component={SafeZonesListScreen} />
       <Stack.Screen name="SOS" component={SOSScreen} />
+      <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} />
     </Stack.Navigator>
   );
 };
