@@ -5,12 +5,10 @@
  * @format
  */
 
-import { StyleSheet, Text, useColorScheme, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
   return (
     <SafeAreaProvider>
       <AppContent />
@@ -20,12 +18,12 @@ function App() {
 
 function AppContent() {
   return (
-    <View>
-      <Text>Hello</Text>
-    </View>
+    <SafeAreaView>
+      <View>
+        <Text>Hello</Text>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default App;
