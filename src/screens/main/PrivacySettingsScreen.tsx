@@ -17,12 +17,17 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
+import { translations } from '../../constants/translations';
 
 const PrivacySettingsScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { groupId } = route.params;
   const { user } = useAuthStore();
+  const { language } = useSettingsStore();
+
+  const t = translations[language];
 
   const [settings, setSettings] = useState({
     pauseSharing: false,
@@ -205,7 +210,7 @@ const PrivacySettingsScreen = () => {
         >
           <Icon name="arrow-left" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Privacy Settings</Text>
+        <Text style={styles.headerTitle}>{t.privacy}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -213,7 +218,7 @@ const PrivacySettingsScreen = () => {
 
         {renderSettingItem(
           'map-marker-off',
-          'Pause Location Sharing',
+          t.pause_sharing,
           'Temporarily stop sharing your live location',
           settings.pauseSharing,
           val => updateSetting('pauseSharing', val),
@@ -221,7 +226,7 @@ const PrivacySettingsScreen = () => {
 
         {renderSettingItem(
           'incognito',
-          'Invisible Mode',
+          t.invisible_mode,
           'Show as offline to other members',
           settings.invisibleMode,
           val => updateSetting('invisibleMode', val),
@@ -229,7 +234,7 @@ const PrivacySettingsScreen = () => {
 
         {renderSettingItem(
           'clock-outline',
-          'Scheduled Sharing',
+          t.scheduled_sharing,
           'Share location only during specific hours',
           settings.shareDuringHours,
           val => updateSetting('shareDuringHours', val),
@@ -292,7 +297,7 @@ const PrivacySettingsScreen = () => {
 
         <TouchableOpacity style={styles.leaveButton} onPress={handleLeaveGroup}>
           <Icon name="exit-run" size={20} color={COLORS.error} />
-          <Text style={styles.leaveButtonText}>Leave Family Circle</Text>
+          <Text style={styles.leaveButtonText}>{t.leave_group}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

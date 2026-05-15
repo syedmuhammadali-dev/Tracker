@@ -4,6 +4,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import DeviceInfo from 'react-native-device-info';
 import { Alert, PermissionsAndroid, Platform } from 'react-native';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 const sleep = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time));
@@ -38,8 +39,21 @@ const backgroundOptions = {
   },
   color: '#00A86B',
   parameters: {
-    delay: 30000, // 30 seconds
+    delay: 30000, // Default 30 seconds
   },
+};
+
+const getOptimizationDelay = () => {
+  const { batteryOptimization, lowInternetMode } = useSettingsStore.getState();
+  
+  if (lowInternetMode) return 300000; // 5 mins if low internet is on regardless of battery
+
+  switch (batteryOptimization) {
+    case 'low': return 300000; // 5 mins
+    case 'medium': return 120000; // 2 mins
+    case 'high': 
+    default: return 30000; // 30s
+  }
 };
 
 export const LocationService = {
@@ -80,9 +94,10 @@ export const LocationService = {
   },
 
   async locationTask(taskDataArguments: any) {
-    const { delay } = taskDataArguments;
     await new Promise(async resolve => {
       while (BackgroundService.isRunning()) {
+        const currentDelay = getOptimizationDelay();
+        
         Geolocation.getCurrentPosition(
           async position => {
             await LocationService.updateFirestoreLocation(position);
@@ -97,7 +112,7 @@ export const LocationService = {
             forceRequestLocation: true,
           },
         );
-        await sleep(delay);
+        await sleep(currentDelay);
       }
     });
   },
@@ -133,19 +148,25 @@ export const LocationService = {
     const currentUser = auth().currentUser;
     if (!currentUser) return;
 
+    const { lowInternetMode } = useSettingsStore.getState();
+
     try {
       const batteryLevel = await DeviceInfo.getBatteryLevel();
       const { latitude, longitude, accuracy } = position.coords;
 
-      const locationData = {
+      // Data Compression: If low internet mode is on, send minimal data
+      let locationData: any = {
         location: {
-          latitude,
-          longitude,
-          accuracy,
+          latitude: parseFloat(latitude.toFixed(5)), // Compress precision
+          longitude: parseFloat(longitude.toFixed(5)),
         },
-        batteryLevel: Math.round(batteryLevel * 100),
         lastUpdated: firestore.FieldValue.serverTimestamp(),
       };
+
+      if (!lowInternetMode) {
+        locationData.location.accuracy = accuracy;
+        locationData.batteryLevel = Math.round(batteryLevel * 100);
+      }
 
       // Always update user's own profile
       await firestore()
