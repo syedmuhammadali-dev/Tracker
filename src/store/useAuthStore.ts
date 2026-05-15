@@ -5,6 +5,7 @@ interface User {
   phoneNumber: string;
   displayName?: string;
   photoURL?: string;
+  role?: string;
   groupId?: string;
 }
 
