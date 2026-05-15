@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -10,7 +10,7 @@ const JoinGroupScreen = () => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [foundGroup, setFoundGroup] = useState<any>(null);
-  
+
   const { user, setUser } = useAuthStore();
 
   const handleFindGroup = async () => {
@@ -48,25 +48,36 @@ const JoinGroupScreen = () => {
 
     setLoading(true);
     try {
-      const groupRef = firestore().collection('familyGroups').doc(foundGroup.id);
-      
+      const groupRef = firestore()
+        .collection('familyGroups')
+        .doc(foundGroup.id);
+
       // Check if already a member
-      const memberDoc = await groupRef.collection('members').doc(user?.uid).get();
+      const memberDoc = await groupRef
+        .collection('members')
+        .doc(user?.uid)
+        .get();
       if (memberDoc.exists) {
-        Alert.alert('Already Member', 'You are already a member of this circle.');
+        Alert.alert(
+          'Already Member',
+          'You are already a member of this circle.',
+        );
         setUser({ ...user!, groupId: foundGroup.id });
         setLoading(false);
         return;
       }
 
       // 1. Add to group members sub-collection
-      await groupRef.collection('members').doc(user?.uid).set({
-        uid: user?.uid,
-        displayName: user?.displayName,
-        role: user?.role,
-        photoURL: user?.photoURL || null,
-        joinedAt: firestore.FieldValue.serverTimestamp(),
-      });
+      await groupRef
+        .collection('members')
+        .doc(user?.uid)
+        .set({
+          uid: user?.uid,
+          displayName: user?.displayName,
+          role: user?.role,
+          photoURL: user?.photoURL || null,
+          joinedAt: firestore.FieldValue.serverTimestamp(),
+        });
 
       // 2. Update user's group ID
       await firestore().collection('users').doc(user?.uid).update({
@@ -96,21 +107,21 @@ const JoinGroupScreen = () => {
 
           <View style={styles.groupCard}>
             <View style={styles.groupIcon}>
-               <Text style={styles.iconText}>👪</Text>
+              <Text style={styles.iconText}>👪</Text>
             </View>
             <Text style={styles.groupName}>{foundGroup.name}</Text>
             <Text style={styles.groupMeta}>Managed by Admin</Text>
           </View>
 
-          <Button 
-            title="Join This Circle" 
-            onPress={handleJoinGroup} 
+          <Button
+            title="Join This Circle"
+            onPress={handleJoinGroup}
             loading={loading}
             style={styles.button}
           />
-          <Button 
-            title="Try Different Code" 
-            onPress={() => setFoundGroup(null)} 
+          <Button
+            title="Try Different Code"
+            onPress={() => setFoundGroup(null)}
             variant="outline"
             style={styles.secondaryButton}
           />
@@ -134,15 +145,15 @@ const JoinGroupScreen = () => {
             label="Invite Code"
             placeholder="ABCXYZ"
             value={code}
-            onChangeText={(val) => setCode(val.toUpperCase())}
+            onChangeText={val => setCode(val.toUpperCase())}
             autoCapitalize="characters"
             maxLength={6}
             style={styles.codeInput}
           />
-          
-          <Button 
-            title="Find Circle" 
-            onPress={handleFindGroup} 
+
+          <Button
+            title="Find Circle"
+            onPress={handleFindGroup}
             loading={loading}
             style={styles.button}
           />

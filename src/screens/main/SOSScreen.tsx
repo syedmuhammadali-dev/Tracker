@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated, Alert, Vibration } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  Animated,
+  Alert,
+  Vibration,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Geolocation from 'react-native-geolocation-service';
@@ -14,7 +23,7 @@ const SOSScreen = () => {
   const [isActivating, setIsActivating] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [isAlertSent, setIsAlertSent] = useState(false);
-  
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -40,7 +49,7 @@ const SOSScreen = () => {
           duration: 1000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -52,9 +61,9 @@ const SOSScreen = () => {
     try {
       // Get current location specifically for SOS
       Geolocation.getCurrentPosition(
-        async (position) => {
+        async position => {
           const batteryLevel = await DeviceInfo.getBatteryLevel();
-          
+
           const sosData = {
             type: 'SOS',
             userId: user?.uid,
@@ -83,16 +92,19 @@ const SOSScreen = () => {
           });
 
           Alert.alert(
-            'SOS Alert Sent', 
+            'SOS Alert Sent',
             'Your family members have been notified of your emergency and location.',
-            [{ text: 'OK', onPress: () => navigation.goBack() }]
+            [{ text: 'OK', onPress: () => navigation.goBack() }],
           );
         },
-        (error) => {
+        error => {
           console.error(error);
-          Alert.alert('Error', 'Could not get your location for the SOS alert.');
+          Alert.alert(
+            'Error',
+            'Could not get your location for the SOS alert.',
+          );
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
       );
     } catch (error) {
       console.error(error);
@@ -114,8 +126,8 @@ const SOSScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <TouchableOpacity 
-          style={styles.closeButton} 
+        <TouchableOpacity
+          style={styles.closeButton}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.closeText}>✕</Text>
@@ -129,8 +141,10 @@ const SOSScreen = () => {
         </View>
 
         <View style={styles.center}>
-          <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]} />
-          
+          <Animated.View
+            style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}
+          />
+
           <TouchableOpacity
             activeOpacity={0.8}
             onPressIn={handlePressIn}
@@ -148,9 +162,9 @@ const SOSScreen = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>What happens?</Text>
           <Text style={styles.footerText}>
-            • All family members get a high-priority alert.{"\n"}
-            • Your live location is shared instantly.{"\n"}
-            • Your battery status is included.
+            • All family members get a high-priority alert.{'\n'}• Your live
+            location is shared instantly.{'\n'}• Your battery status is
+            included.
           </Text>
         </View>
       </View>

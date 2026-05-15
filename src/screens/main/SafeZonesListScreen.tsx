@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { MainStackParamList } from '../../navigation/MainNavigator';
+import { MainStackParamList } from '../../types/navigation';
 import { useAuthStore } from '../../store/useAuthStore';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import Button from '../../components/common/Button';
@@ -21,14 +29,20 @@ const SafeZonesListScreen = () => {
       .collection('familyGroups')
       .doc(user.groupId)
       .collection('safeZones')
-      .onSnapshot((snapshot) => {
-        const zoneList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setZones(zoneList);
-        setLoading(false);
-      }, (error) => {
-        console.error(error);
-        setLoading(false);
-      });
+      .onSnapshot(
+        snapshot => {
+          const zoneList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setZones(zoneList);
+          setLoading(false);
+        },
+        error => {
+          console.error(error);
+          setLoading(false);
+        },
+      );
 
     return () => unsubscribe();
   }, [user?.groupId]);
@@ -48,8 +62,8 @@ const SafeZonesListScreen = () => {
         <Text style={styles.zoneName}>{item.name}</Text>
         <Text style={styles.zoneDetails}>Radius: {item.radius}m</Text>
       </View>
-      <TouchableOpacity 
-        style={styles.deleteButton} 
+      <TouchableOpacity
+        style={styles.deleteButton}
         onPress={() => handleDeleteZone(item.id)}
       >
         <Text style={styles.deleteText}>🗑️</Text>
@@ -68,11 +82,15 @@ const SafeZonesListScreen = () => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={styles.loader}
+          />
         ) : (
           <FlatList
             data={zones}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             renderItem={renderZone}
             contentContainerStyle={styles.list}
             ListEmptyComponent={
@@ -83,8 +101,8 @@ const SafeZonesListScreen = () => {
           />
         )}
 
-        <Button 
-          title="Add New Safe Zone" 
+        <Button
+          title="Add New Safe Zone"
           onPress={() => navigation.navigate('AddSafeZone')}
           style={styles.addButton}
         />

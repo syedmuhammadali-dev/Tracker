@@ -12,6 +12,7 @@ export type AuthStackParamList = {
   Onboarding: undefined;
   Login: undefined;
   OtpVerification: { confirmation: any; phoneNumber: string };
+  ProfileSetup: undefined;
 };
 
 export type MainStackParamList = {
@@ -26,4 +27,6 @@ export type MainStackParamList = {
   SOS: undefined;
 };
 
-export type AppNavigationProp = StackNavigationProp<RootStackParamList & AuthStackParamList & MainStackParamList>;
+export type AppNavigationProp = StackNavigationProp<
+  RootStackParamList & AuthStackParamList & MainStackParamList
+>;

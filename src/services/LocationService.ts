@@ -5,9 +5,15 @@ import auth from '@react-native-firebase/auth';
 import DeviceInfo from 'react-native-device-info';
 import { Alert, PermissionsAndroid, Platform } from 'react-native';
 
-const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+const sleep = (time: number) =>
+  new Promise(resolve => setTimeout(resolve, time));
 
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) => {
   const R = 6371e3; // Earth's radius in meters
   const φ1 = (lat1 * Math.PI) / 180;
   const φ2 = (lat2 * Math.PI) / 180;
@@ -45,22 +51,25 @@ export const LocationService = {
 
     if (Platform.OS === 'android') {
       const foreground = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       );
       if (foreground !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission Denied', 'Foreground location permission is required.');
+        Alert.alert(
+          'Permission Denied',
+          'Foreground location permission is required.',
+        );
         return false;
       }
 
       // For Android 10+
       if (Platform.Version >= 29) {
         const background = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
+          PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
         );
         if (background !== PermissionsAndroid.RESULTS.GRANTED) {
           Alert.alert(
             'Permission Denied',
-            'Background location permission is required for continuous family safety.'
+            'Background location permission is required for continuous family safety.',
           );
           return false;
         }
@@ -72,21 +81,21 @@ export const LocationService = {
 
   async locationTask(taskDataArguments: any) {
     const { delay } = taskDataArguments;
-    await new Promise(async (resolve) => {
+    await new Promise(async resolve => {
       while (BackgroundService.isRunning()) {
         Geolocation.getCurrentPosition(
-          async (position) => {
+          async position => {
             await LocationService.updateFirestoreLocation(position);
           },
-          (error) => {
+          error => {
             console.error('Location Error:', error);
           },
-          { 
-            enableHighAccuracy: true, 
-            timeout: 15000, 
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
             maximumAge: 10000,
-            forceRequestLocation: true 
-          }
+            forceRequestLocation: true,
+          },
         );
         await sleep(delay);
       }
@@ -139,10 +148,16 @@ export const LocationService = {
       };
 
       // Update in user's profile
-      await firestore().collection('users').doc(currentUser.uid).set(locationData, { merge: true });
+      await firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .set(locationData, { merge: true });
 
       // If user is in a group, update in group members as well
-      const userDoc = await firestore().collection('users').doc(currentUser.uid).get();
+      const userDoc = await firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .get();
       const groupId = userDoc.data()?.groupId;
 
       if (groupId) {
@@ -154,14 +169,24 @@ export const LocationService = {
           .set(locationData, { merge: true });
 
         // Check Safe Zones
-        await this.checkSafeZones(groupId, currentUser.uid, latitude, longitude);
+        await this.checkSafeZones(
+          groupId,
+          currentUser.uid,
+          latitude,
+          longitude,
+        );
       }
     } catch (error) {
       console.error('Error updating location to Firestore:', error);
     }
   },
 
-  async checkSafeZones(groupId: string, userId: string, lat: number, lng: number) {
+  async checkSafeZones(
+    groupId: string,
+    userId: string,
+    lat: number,
+    lng: number,
+  ) {
     try {
       const zonesSnapshot = await firestore()
         .collection('familyGroups')
@@ -176,17 +201,32 @@ export const LocationService = {
 
       for (const zoneDoc of zonesSnapshot.docs) {
         const zone = zoneDoc.data();
-        const distance = calculateDistance(lat, lng, zone.latitude, zone.longitude);
+        const distance = calculateDistance(
+          lat,
+          lng,
+          zone.latitude,
+          zone.longitude,
+        );
 
         if (distance <= zone.radius) {
           newZones.push(zone.name);
           if (!previousZones.includes(zone.name)) {
             // Entered Zone
-            this.sendZoneAlert(groupId, userData?.displayName, zone.name, 'entered');
+            this.sendZoneAlert(
+              groupId,
+              userData?.displayName,
+              zone.name,
+              'entered',
+            );
           }
         } else if (previousZones.includes(zone.name)) {
           // Exited Zone
-          this.sendZoneAlert(groupId, userData?.displayName, zone.name, 'exited');
+          this.sendZoneAlert(
+            groupId,
+            userData?.displayName,
+            zone.name,
+            'exited',
+          );
         }
       }
 
@@ -198,7 +238,12 @@ export const LocationService = {
     }
   },
 
-  async sendZoneAlert(groupId: string, userName: string, zoneName: string, action: 'entered' | 'exited') {
+  async sendZoneAlert(
+    groupId: string,
+    userName: string,
+    zoneName: string,
+    action: 'entered' | 'exited',
+  ) {
     // In a real app, this would trigger a push notification via Firebase Functions.
     // For now, we'll log it and create a notification in Firestore.
     try {
@@ -215,5 +260,5 @@ export const LocationService = {
     } catch (error) {
       console.error('Error sending zone alert:', error);
     }
-  }
+  },
 };

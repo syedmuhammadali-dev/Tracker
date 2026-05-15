@@ -19,12 +19,12 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>(set => ({
   user: null,
   isLoading: true,
   isSharing: false,
-  setUser: (user) => set({ user, isLoading: false }),
-  setLoading: (loading) => set({ isLoading: loading }),
-  setSharing: (sharing) => set({ isSharing: sharing }),
+  setUser: user => set({ user, isLoading: false }),
+  setLoading: loading => set({ isLoading: loading }),
+  setSharing: sharing => set({ isSharing: sharing }),
   logout: () => set({ user: null, isLoading: false, isSharing: false }),
 }));

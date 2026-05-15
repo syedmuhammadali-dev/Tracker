@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Circle, Marker, Region } from 'react-native-maps';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import MapView, {
+  PROVIDER_GOOGLE,
+  Circle,
+  Marker,
+  Region,
+} from 'react-native-maps';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -11,7 +24,7 @@ import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 const AddSafeZoneScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  
+
   const [name, setName] = useState('');
   const [radius, setRadius] = useState(200); // Default 200m
   const [loading, setLoading] = useState(false);
@@ -71,16 +84,24 @@ const AddSafeZoneScreen = () => {
             onRegionChangeComplete={setCenter}
           >
             <Circle
-              center={{ latitude: center.latitude, longitude: center.longitude }}
+              center={{
+                latitude: center.latitude,
+                longitude: center.longitude,
+              }}
               radius={radius}
               fillColor="rgba(0, 168, 107, 0.2)"
               strokeColor={COLORS.primary}
               strokeWidth={2}
             />
-            <Marker coordinate={{ latitude: center.latitude, longitude: center.longitude }} />
+            <Marker
+              coordinate={{
+                latitude: center.latitude,
+                longitude: center.longitude,
+              }}
+            />
           </MapView>
           <View style={styles.crosshair}>
-             <Text style={styles.crosshairIcon}>📍</Text>
+            <Text style={styles.crosshairIcon}>📍</Text>
           </View>
         </View>
 
@@ -94,22 +115,30 @@ const AddSafeZoneScreen = () => {
 
           <Text style={styles.label}>Radius: {radius} meters</Text>
           <View style={styles.radiusOptions}>
-             {[100, 200, 500, 1000].map((r) => (
-               <TouchableOpacity 
-                 key={r} 
-                 style={[styles.radiusButton, radius === r && styles.activeRadius]}
-                 onPress={() => setRadius(r)}
-               >
-                 <Text style={[styles.radiusText, radius === r && styles.activeRadiusText]}>
-                   {r}m
-                 </Text>
-               </TouchableOpacity>
-             ))}
+            {[100, 200, 500, 1000].map(r => (
+              <TouchableOpacity
+                key={r}
+                style={[
+                  styles.radiusButton,
+                  radius === r && styles.activeRadius,
+                ]}
+                onPress={() => setRadius(r)}
+              >
+                <Text
+                  style={[
+                    styles.radiusText,
+                    radius === r && styles.activeRadiusText,
+                  ]}
+                >
+                  {r}m
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          <Button 
-            title="Save Safe Zone" 
-            onPress={handleSave} 
+          <Button
+            title="Save Safe Zone"
+            onPress={handleSave}
             loading={loading}
             style={styles.saveButton}
           />

@@ -1,15 +1,8 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { MainStackParamList } from '../../navigation/MainNavigator';
+import { MainStackParamList } from '../../types/navigation';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import Button from '../../components/common/Button';
 

@@ -11,6 +11,7 @@ import MainNavigator from './MainNavigator';
 import ProfileSetupScreen from '../screens/auth/ProfileSetupScreen';
 import GroupSelectionScreen from '../screens/main/GroupSelectionScreen';
 import { RootStackParamList } from '../types/navigation';
+import { NotificationService } from '../services/NotificationService';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -22,7 +23,10 @@ const AppNavigator = () => {
   async function onAuthStateChanged(fbUser: any) {
     if (fbUser) {
       // Fetch Firestore data
-      const userDoc = await firestore().collection('users').doc(fbUser.uid).get();
+      const userDoc = await firestore()
+        .collection('users')
+        .doc(fbUser.uid)
+        .get();
       const userData = userDoc.data();
 
       setUser({
@@ -42,7 +46,7 @@ const AppNavigator = () => {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    
+
     // Setup Notifications
     NotificationService.requestUserPermission();
     const unsubscribeNotifications = NotificationService.setupListeners();

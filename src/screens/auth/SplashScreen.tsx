@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { COLORS } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 

@@ -4,11 +4,11 @@ import HomeScreen from '../screens/main/HomeScreen';
 import MapScreen from '../screens/main/MapScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import CreateGroupScreen from '../screens/main/CreateGroupScreen';
-import JoinGroupScreen from '../screens/main/JoinGroupScreen';
 import GroupMembersScreen from '../screens/main/GroupMembersScreen';
 import AddSafeZoneScreen from '../screens/main/AddSafeZoneScreen';
 import SafeZonesListScreen from '../screens/main/SafeZonesListScreen';
 import SOSScreen from '../screens/main/SOSScreen';
+import JoinGroupScreen from '../screens/main/JoinGroupScreen';
 import { MainStackParamList } from '../types/navigation';
 
 const Stack = createStackNavigator<MainStackParamList>();

@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, Image, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { MainStackParamList } from '../../navigation/MainNavigator';
+import { MainStackParamList } from '../../types/navigation';
 import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 
 const GroupMembersScreen = () => {
@@ -16,14 +24,17 @@ const GroupMembersScreen = () => {
       .collection('familyGroups')
       .doc(groupId)
       .collection('members')
-      .onSnapshot((snapshot) => {
-        const memberList = snapshot.docs.map(doc => doc.data());
-        setMembers(memberList);
-        setLoading(false);
-      }, (error) => {
-        console.error(error);
-        setLoading(false);
-      });
+      .onSnapshot(
+        snapshot => {
+          const memberList = snapshot.docs.map(doc => doc.data());
+          setMembers(memberList);
+          setLoading(false);
+        },
+        error => {
+          console.error(error);
+          setLoading(false);
+        },
+      );
 
     return () => unsubscribe();
   }, [groupId]);
@@ -60,11 +71,15 @@ const GroupMembersScreen = () => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={styles.loader}
+          />
         ) : (
           <FlatList
             data={members}
-            keyExtractor={(item) => item.uid}
+            keyExtractor={item => item.uid}
             renderItem={renderMember}
             contentContainerStyle={styles.list}
             ListEmptyComponent={

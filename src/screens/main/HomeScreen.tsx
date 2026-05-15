@@ -13,7 +13,7 @@ import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 import { LocationService } from '../../services/LocationService';
 import { MainStackParamList } from '../../types/navigation';
-import { Switch, Alert } from 'react-native';
+import { Switch } from 'react-native';
 
 const HomeScreen = () => {
   const navigation = useNavigation<StackNavigationProp<MainStackParamList>>();
@@ -53,7 +53,9 @@ const HomeScreen = () => {
           <View style={styles.sharingInfo}>
             <Text style={styles.sharingTitle}>Location Sharing</Text>
             <Text style={styles.sharingSubtitle}>
-              {isSharing ? 'Live location is being shared' : 'Location sharing is paused'}
+              {isSharing
+                ? 'Live location is being shared'
+                : 'Location sharing is paused'}
             </Text>
           </View>
           <Switch
@@ -84,9 +86,11 @@ const HomeScreen = () => {
               onPress={() => navigation.navigate('SOS')}
             >
               <Text style={styles.actionIcon}>🚨</Text>
-              <Text style={[styles.actionText, { color: COLORS.white }]}>SOS</Text>
+              <Text style={[styles.actionText, { color: COLORS.white }]}>
+                SOS
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => navigation.navigate('SafeZonesList')}
             >
