@@ -8,14 +8,14 @@ import SplashScreen from '../screens/auth/SplashScreen';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import ProfileSetupScreen from '../screens/auth/ProfileSetupScreen';
-import CreateJoinGroupScreen from '../screens/main/CreateJoinGroupScreen';
+import GroupSelectionScreen from '../screens/main/GroupSelectionScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
   Auth: undefined;
   Main: undefined;
   ProfileSetup: undefined;
-  CreateJoinGroup: undefined;
+  GroupSelection: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -57,7 +57,10 @@ const AppNavigator = () => {
         ) : !user.displayName ? (
           <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         ) : !user.groupId ? (
-          <Stack.Screen name="CreateJoinGroup" component={CreateJoinGroupScreen} />
+          <Stack.Screen
+            name="GroupSelection"
+            component={GroupSelectionScreen}
+          />
         ) : (
           <Stack.Screen name="Main" component={MainNavigator} />
         )}
