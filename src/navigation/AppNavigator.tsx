@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import auth from '@react-native-firebase/auth';
 import { useAuthStore } from '../store/useAuthStore';
 
 import SplashScreen from '../screens/auth/SplashScreen';
@@ -20,9 +21,31 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuthStore();
+  const { user, setUser, isLoading, setLoading } = useAuthStore();
+  const [initializing, setInitializing] = useState(true);
 
-  if (isLoading) {
+  // Handle user state changes
+  function onAuthStateChanged(fbUser: any) {
+    if (fbUser) {
+      setUser({
+        uid: fbUser.uid,
+        phoneNumber: fbUser.phoneNumber || '',
+        displayName: fbUser.displayName || undefined,
+        photoURL: fbUser.photoURL || undefined,
+      });
+    } else {
+      setUser(null);
+    }
+    if (initializing) setInitializing(false);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  if (isLoading || initializing) {
     return <SplashScreen />;
   }
 

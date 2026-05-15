@@ -1,70 +1,99 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Alert,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import auth from '@react-native-firebase/auth';
 import Button from '../../components/common/Button';
-import { COLORS, FONTS, SPACING, SIZES } from '../../constants/theme';
-import { useAuthStore } from '../../store/useAuthStore';
+import Input from '../../components/common/Input';
+import { COLORS, FONTS, SPACING } from '../../constants/theme';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
 const LoginScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1); // 1: Phone, 2: OTP
-  const setUser = useAuthStore(state => state.setUser);
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
 
-  const handleSendOTP = () => {
-    // Firebase Phone Auth logic would go here
-    setStep(2);
+  const validatePhone = (phone: string) => {
+    // Basic Pakistan phone validation (starts with 3 and is 10 digits after +92)
+    const regex = /^3\d{9}$/;
+    return regex.test(phone);
   };
 
-  const handleVerifyOTP = () => {
-    // Mocking user login for now
-    setUser({
-      uid: '123',
-      phoneNumber,
-    });
+  const handleSendOTP = async () => {
+    if (!validatePhone(phoneNumber)) {
+      Alert.alert(
+        'Invalid Number',
+        'Please enter a valid 10-digit mobile number starting with 3.',
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formattedPhone = `+92${phoneNumber}`;
+      const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+      setLoading(false);
+      navigation.navigate('OtpVerification', {
+        phoneNumber: formattedPhone,
+        confirmation,
+      });
+    } catch (error: any) {
+      setLoading(false);
+      console.error(error);
+      Alert.alert(
+        'Error',
+        error.message || 'Failed to send OTP. Please try again.',
+      );
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            {step === 1 ? 'Welcome Back' : 'Verify Phone'}
-          </Text>
-          <Text style={styles.subtitle}>
-            {step === 1
-              ? 'Enter your phone number to continue'
-              : `Enter the code sent to ${phoneNumber}`}
-          </Text>
-        </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Welcome to SafeCircle</Text>
+            <Text style={styles.subtitle}>
+              Secure your family with Pakistan's premium safety app.
+            </Text>
+          </View>
 
-        <View style={styles.form}>
-          {step === 1 ? (
-            <TextInput
-              style={styles.input}
-              placeholder="+92 300 1234567"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-          ) : (
-            <TextInput
-              style={styles.input}
-              placeholder="000000"
-              value={otp}
-              onChangeText={setOtp}
-              keyboardType="number-pad"
-              maxLength={6}
-            />
-          )}
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Input
+                label="Phone Number"
+                placeholder="300 1234567"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                maxLength={10}
+                style={{ paddingLeft: 55 }}
+              />
+              <Text style={styles.prefix}>+92</Text>
+            </View>
 
-          <Button
-            title={step === 1 ? 'Send OTP' : 'Verify & Continue'}
-            onPress={step === 1 ? handleSendOTP : handleVerifyOTP}
-            style={styles.button}
-          />
+            <Text style={styles.infoText}>
+              We'll send an OTP for verification. Messaging rates may apply.
+            </Text>
+
+            <Button
+              title="Get Verification Code"
+              onPress={handleSendOTP}
+              loading={loading}
+              style={styles.button}
+            />
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -82,9 +111,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   title: {
-    ...FONTS.h2,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
+    ...FONTS.h1,
+    color: COLORS.primary,
+    marginBottom: SPACING.sm,
   },
   subtitle: {
     ...FONTS.body2,
@@ -93,18 +122,24 @@ const styles = StyleSheet.create({
   form: {
     marginTop: SPACING.xl,
   },
-  input: {
-    height: 56,
-    backgroundColor: COLORS.surface,
-    borderRadius: SIZES.radius,
-    paddingHorizontal: SPACING.md,
+  inputContainer: {
+    position: 'relative',
+  },
+  prefix: {
+    position: 'absolute',
+    left: 15,
+    top: 42,
     ...FONTS.body1,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+  infoText: {
+    ...FONTS.caption,
+    color: COLORS.textSecondary,
     marginBottom: SPACING.lg,
   },
   button: {
-    marginTop: SPACING.sm,
+    marginTop: SPACING.md,
   },
 });
 
