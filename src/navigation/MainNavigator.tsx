@@ -7,6 +7,7 @@ import GroupMembersScreen from '../screens/main/GroupMembersScreen';
 import AddSafeZoneScreen from '../screens/main/AddSafeZoneScreen';
 import SafeZonesListScreen from '../screens/main/SafeZonesListScreen';
 import SOSScreen from '../screens/main/SOSScreen';
+import { createStackNavigator } from '@react-navigation/stack';
 
 export type MainStackParamList = {
   Home: undefined;

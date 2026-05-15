@@ -9,6 +9,7 @@ import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import ProfileSetupScreen from '../screens/auth/ProfileSetupScreen';
 import GroupSelectionScreen from '../screens/main/GroupSelectionScreen';
+import { NotificationService } from '../services/NotificationService';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -42,7 +43,15 @@ const AppNavigator = () => {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    
+    // Setup Notifications
+    NotificationService.requestUserPermission();
+    const unsubscribeNotifications = NotificationService.setupListeners();
+
+    return () => {
+      subscriber();
+      unsubscribeNotifications();
+    };
   }, []);
 
   if (isLoading || initializing) {
